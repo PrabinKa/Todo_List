@@ -1,12 +1,59 @@
-import {View, Text, StyleSheet} from 'react-native';
-import React from 'react';
+import {View, Text, StyleSheet, FlatList} from 'react-native';
+import React, {useState} from 'react';
 
 import {COLORS} from '../constants/Colors';
-import {Button} from '../components';
+import {Button, TodoItem, AlertModal} from '../components';
+import {useAppContext} from '../context/AppContext';
 
 const TodoListsScreen = ({navigation}) => {
+  const {todos, deleteTodo} = useAppContext();
+  const [isAlertVisible, setIsAlertVisible] = useState(false);
+  const [buttonClickedType, setButtonClickedType] = useState('');
+  const [todoItem, setTodoItem] = useState();
+
+  const handleTodoOperation = () => {
+    if (buttonClickedType == 'delete') {
+      deleteTodo(todoItem.id);
+      setIsAlertVisible(false);
+    }
+  };
+
+  const hideAlertModal = () => {
+    setIsAlertVisible(false);
+  };
+
+  const handleClickedButtonType = (type, item) => {
+    setButtonClickedType(type);
+    setTodoItem(item);
+    setIsAlertVisible(true);
+  };
+
   return (
     <View style={styles.container}>
+      {todos.length == 0 ? (
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <Text style={{color: COLORS.secondary11}}>No todo Added</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={todos}
+          keyExtractor={item => item.id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{padding: 20}}
+          renderItem={({item}) => {
+            return (
+              <TodoItem
+                item={item}
+                colors={COLORS}
+                navigation={navigation}
+                onTodoButtonClicked={(type, item) =>
+                  handleClickedButtonType(type, item)
+                }
+              />
+            );
+          }}
+        />
+      )}
       <View style={styles.createTodoButtonWrapper}>
         <Button
           onPress={() => {
@@ -16,6 +63,12 @@ const TodoListsScreen = ({navigation}) => {
           icon={require('../assets/plus.png')}
         />
       </View>
+      <AlertModal
+        message={buttonClickedType}
+        onClose={hideAlertModal}
+        isVisible={isAlertVisible}
+        onPress={() => handleTodoOperation()}
+      />
     </View>
   );
 };
@@ -33,9 +86,11 @@ const styles = StyleSheet.create({
     right: 20,
   },
   createTodoButton: {
-    height: 60,
-    width: 60,
+    height: 50,
+    width: 50,
     borderRadius: 30,
-    backgroundColor: COLORS.secondary00,
+    backgroundColor: COLORS.secondary11,
+    borderWidth: 2,
+    borderColor: COLORS.secondary00,
   },
 });

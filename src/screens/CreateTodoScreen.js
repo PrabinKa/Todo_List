@@ -2,14 +2,18 @@ import {View, Text, TextInput, StyleSheet} from 'react-native';
 import React, {useRef, useState} from 'react';
 
 import {COLORS} from '../constants/Colors';
-import {Button} from '../components';
+import {Button, ErrorModal} from '../components';
 import {useAppContext} from '../context/AppContext';
 
 const CreateTodoScreen = ({navigation}) => {
   const titleInputRef = useRef();
   const descriptionInputRef = useRef();
   const {addTodo} = useAppContext();
+  const [isErrorVisible, setIsErrorVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
   const date = new Date();
+
+//   console.log(isErrorVisible)
 
   const [inputs, setInputs] = useState({
     id: Math.random().toString(16).slice(2),
@@ -29,8 +33,19 @@ const CreateTodoScreen = ({navigation}) => {
   };
 
   const saveButtonHandler = () => {
-    addTodo(inputs)
-  }
+    const {todoTitle, todoNote} = inputs;
+    if (todoTitle == '' || todoNote == '') {
+      setIsErrorVisible(true);
+      setErrorMessage('Every field must be filled !');
+    } else {
+      addTodo(inputs);
+      navigation.goBack();
+    }
+  };
+
+    const hideErrorModal = () => {
+    setIsErrorVisible(false);
+  };
 
   return (
     <View style={styles.container}>
@@ -66,11 +81,18 @@ const CreateTodoScreen = ({navigation}) => {
           Cancel
         </Button>
         <Button
-          onPress={() => {saveButtonHandler()}}
+          onPress={() => {
+            saveButtonHandler();
+          }}
           styleConfigs={styles.saveButton}>
           Save
         </Button>
       </View>
+      <ErrorModal
+        isVisible={isErrorVisible}
+        message={errorMessage}
+        onClose={hideErrorModal}
+      />
     </View>
   );
 };
