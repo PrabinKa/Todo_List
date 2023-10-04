@@ -1,4 +1,4 @@
-import {View, Text, TextInput, StyleSheet} from 'react-native';
+import {View, TextInput, StyleSheet} from 'react-native';
 import React, {useRef, useState} from 'react';
 
 import {COLORS} from '../constants/Colors';
@@ -6,16 +6,23 @@ import {Button, ErrorModal} from '../components';
 import {useAppContext} from '../context/AppContext';
 
 const CreateTodoScreen = ({navigation, route}) => {
+  // Refs for title and description text inputs
   const titleInputRef = useRef();
   const descriptionInputRef = useRef();
+
+  // Access the application context for adding and editing todos
   const {addTodo, editTodo} = useAppContext();
+
+  // State to manage error message visibility and content
   const [isErrorVisible, setIsErrorVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
-  const date = new Date();
+
+  // Extract the 'todoItem' from the route params foe edit operation
   const {todoItem} = route.params;
 
-  // console.log('todoItem', todoItem);
+  const date = new Date();
 
+  // Initialize 'inputs' state with todo data or defaults
   const [inputs, setInputs] = useState({
     id: todoItem?.id || Math.random().toString(16).slice(2),
     todoTitle: todoItem?.todoTitle || '',
@@ -24,6 +31,7 @@ const CreateTodoScreen = ({navigation, route}) => {
     createdAt: todoItem?.createdAt || date.toISOString(),
   });
 
+  // Handler for input changes
   const inputChangeHandler = (inputIdentifier, enteredValue) => {
     setInputs(curNoteInputs => {
       return {
@@ -33,34 +41,40 @@ const CreateTodoScreen = ({navigation, route}) => {
     });
   };
 
-  const saveButtonHandler = () => {
+  // Function to validate and handle the save or update operation
+  const validateAndHandle = () => {
     const {todoTitle, todoNote} = inputs;
-    if (todoTitle == '' || todoNote == '') {
+    if (todoTitle.trim() === '' || todoNote.trim() === '') {
       setIsErrorVisible(true);
-      setErrorMessage('Every field must be filled !');
+      setErrorMessage('Every field must be filled!');
     } else {
-      addTodo(inputs);
-      navigation.goBack();
+      todoItem ? updateTodo() : saveTodo();
     }
   };
 
-  const updateButtonHandler = () => {
-    const {todoTitle, todoNote} = inputs;
-    if (todoTitle == '' || todoNote == '') {
-      setIsErrorVisible(true);
-      setErrorMessage('Every field must be filled !');
-    } else {
-      editTodo(inputs);
-      navigation.goBack();
-    }
+  // Handler for save button click
+  const saveTodo = () => {
+    addTodo(inputs);
+    navigation.goBack();
   };
 
+  // Handler for update button click
+  const updateTodo = () => {
+    editTodo(inputs);
+    navigation.goBack();
+  };
+
+  // Handler to hide the error modal
   const hideErrorModal = () => {
     setIsErrorVisible(false);
   };
 
+  // Determine the button label based on whether it's an edit or save operation
+  const buttonLabel = todoItem ? 'Update' : 'Save';
+
   return (
     <View style={styles.container}>
+      {/* Title input */}
       <TextInput
         placeholder="Title"
         placeholderTextColor="#555"
@@ -71,6 +85,7 @@ const CreateTodoScreen = ({navigation, route}) => {
         onChangeText={inputChangeHandler.bind(this, 'todoTitle')}
         value={inputs.todoTitle}
       />
+      {/* Description input */}
       <TextInput
         placeholder="Describe how will you perform this task.."
         autoCapitalize="sentences"
@@ -85,6 +100,7 @@ const CreateTodoScreen = ({navigation, route}) => {
         value={inputs.todoNote}
       />
       <View style={styles.buttonContainer}>
+        {/* Cancel button */}
         <Button
           onPress={() => {
             navigation.goBack();
@@ -92,14 +108,12 @@ const CreateTodoScreen = ({navigation, route}) => {
           styleConfigs={styles.cancelButton}>
           Cancel
         </Button>
-        <Button
-          onPress={() => {
-            todoItem ? updateButtonHandler() : saveButtonHandler();
-          }}
-          styleConfigs={styles.saveButton}>
-          {todoItem ? 'Update' : 'Save'}
+        {/* Save or Update button */}
+        <Button onPress={validateAndHandle} styleConfigs={styles.saveButton}>
+          {buttonLabel}
         </Button>
       </View>
+      {/* Error modal for validation errors */}
       <ErrorModal
         isVisible={isErrorVisible}
         message={errorMessage}
@@ -149,7 +163,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 40,
     marginRight: 10,
-    backgroundColor: '#E71D36',
+    backgroundColor: COLORS.red,
     borderRadius: 5,
   },
   saveButton: {

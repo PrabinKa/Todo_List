@@ -1,5 +1,5 @@
 import {View, Text, StyleSheet, FlatList} from 'react-native';
-import React, {useState} from 'react';
+import React, {useState, useCallback} from 'react';
 
 import {COLORS} from '../constants/Colors';
 import {Button, TodoItem, AlertModal} from '../components';
@@ -11,31 +11,34 @@ const TodoListsScreen = ({navigation}) => {
   const [buttonClickedType, setButtonClickedType] = useState('');
   const [todoItem, setTodoItem] = useState();
 
-
+  // Handle the todo operations(edit and delete) based on the button clicked
   const handleTodoOperation = () => {
     if (buttonClickedType == 'delete') {
       deleteTodo(todoItem.id);
       setIsAlertVisible(false);
-    }else{
-      navigation.navigate('Create Todo', {todoItem})
+    } else {
+      setIsAlertVisible(false);
+      navigation.navigate('Create Todo', {todoItem});
     }
   };
 
+  // Hide the alert modal
   const hideAlertModal = () => {
     setIsAlertVisible(false);
   };
 
-  const handleClickedButtonType = (type, item) => {
+  // Handle the button click by setting the button type and todo item
+  const handleClickedButtonType = useCallback((type, item) => {
     setButtonClickedType(type);
     setTodoItem(item);
     setIsAlertVisible(true);
-  };
+  }, []);
 
   return (
     <View style={styles.container}>
       {todos.length == 0 ? (
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-          <Text style={{color: COLORS.secondary11}}>No todo Added</Text>
+        <View style={styles.noTodosMessage}>
+          <Text style={styles.noTodosText}>No todo Added</Text>
         </View>
       ) : (
         <FlatList
@@ -57,15 +60,17 @@ const TodoListsScreen = ({navigation}) => {
           }}
         />
       )}
+      {/* Create a button to add a new todo */}
       <View style={styles.createTodoButtonWrapper}>
         <Button
           onPress={() => {
-            navigation.navigate('Create Todo');
+            navigation.navigate('Create Todo', {todoItem: null});
           }}
           styleConfigs={styles.createTodoButton}
           icon={require('../assets/plus.png')}
         />
       </View>
+      {/* Display the AlertModal for todo operations */}
       <AlertModal
         message={buttonClickedType}
         onClose={hideAlertModal}
@@ -82,6 +87,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.primary00,
+  },
+  noTodosMessage: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noTodosText: {
+    color: COLORS.secondary11,
   },
   createTodoButtonWrapper: {
     position: 'absolute',

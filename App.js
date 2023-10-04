@@ -1,16 +1,17 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import React from 'react';
+import {StatusBar} from 'react-native';
 
-import { AppProvider } from './src/context/AppContext'
-
-import RootNavigator from './src/navigation/RootNavigator'
+import RootNavigator from './src/navigation/RootNavigator';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
+import {COLORS} from './src/constants/Colors';
 
 const App = () => {
   return (
-    <AppProvider>
-      <RootNavigator/>
-    </AppProvider>
-  )
-}
+    <SafeAreaProvider>
+      <StatusBar backgroundColor={COLORS.secondary11} />
+      <RootNavigator />
+    </SafeAreaProvider>
+  );
+};
 
-export default App
+export default App;

@@ -1,32 +1,28 @@
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
-import React, {useState} from 'react';
+import React, {memo} from 'react';
 
 import CheckBox from './CheckBox';
 import Button from './Button';
+import {useAppContext} from '../context/AppContext';
 
 const TodoItem = ({item, colors, navigation, onTodoButtonClicked}) => {
   const {id, todoTitle, todoNote, completed, createdAt} = item;
-
-  const [checked, setChecked] = useState(false);
+  const {updateTodoCompletion} = useAppContext();
 
   const toggleCheck = () => {
-    setChecked(!checked);
+    updateTodoCompletion(item);
   };
 
-  const handleButtonClick = (type, item) => {
-    onTodoButtonClicked(type, item)
-  }
+  const handleButtonClick = type => {
+    onTodoButtonClicked(type, item);
+  };
 
   return (
     <TouchableOpacity
       activeOpacity={0.5}
+      onPress={() => {navigation.navigate('Todo Details', {item})}}
       style={[styles.container, {backgroundColor: colors.secondary11}]}>
-      <CheckBox
-        onPress={() => {
-          toggleCheck();
-        }}
-        checked={checked}
-      />
+      <CheckBox onPress={toggleCheck} checked={completed} />
       <Text style={[styles.title, {color: colors.primary00}]}>{todoTitle}</Text>
       <View style={{flexDirection: 'row'}}>
         <Button
@@ -38,7 +34,7 @@ const TodoItem = ({item, colors, navigation, onTodoButtonClicked}) => {
             marginRight: 10,
           }}
           icon={require('../assets/edit.png')}
-          onPress={() => {handleButtonClick("edit", item)}}
+          onPress={() => handleButtonClick('edit')}
         />
         <Button
           styleConfigs={{
@@ -48,14 +44,14 @@ const TodoItem = ({item, colors, navigation, onTodoButtonClicked}) => {
             borderRadius: 5,
           }}
           icon={require('../assets/trash.png')}
-          onPress={() => {handleButtonClick("delete", item)}}
+          onPress={() => handleButtonClick('delete')}
         />
       </View>
     </TouchableOpacity>
   );
 };
 
-export default TodoItem;
+export default memo(TodoItem);
 
 const styles = StyleSheet.create({
   container: {
