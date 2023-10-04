@@ -33,22 +33,40 @@ const AppProvider = ({children}) => {
     }
   };
 
-  const editTodo = () => {
-    // Implement the logic to edit a todo in AsyncStorage and update the state
+  const editTodo = async updatedTodo => {
+    // console.log('updated1', updatedTodo);
+    try {
+      const existingTodos = await AsyncStorage.getItem('todo');
+      const parsedTodos = JSON.parse(existingTodos) || [];
+      const updatedTodos = parsedTodos.map(todo => {
+        if (todo.id === updatedTodo.id) {
+          return {
+            ...todo,
+            todoTitle: updatedTodo.todoTitle,
+            todoNote: updatedTodo.todoNote,
+          };
+        }
+        return todo;
+      });
+      await AsyncStorage.setItem('todo', JSON.stringify(updatedTodos));
+      setTodos(updatedTodos);
+    } catch (error) {
+      console.error('Error editing todo:', error);
+    }
   };
 
-  const deleteTodo = async (id) => {
+  const deleteTodo = async id => {
     try {
-        const existingTodos = await AsyncStorage.getItem('todo');
-        const parsedTodos = JSON.parse(existingTodos) || [];
-        
-        const updatedTodos = parsedTodos.filter((todo) => todo.id !== id);
-    
-        await AsyncStorage.setItem('todo', JSON.stringify(updatedTodos));
-        setTodos(updatedTodos);
-      } catch (error) {
-        console.error('Error deleting todo:', error);
-      }
+      const existingTodos = await AsyncStorage.getItem('todo');
+      const parsedTodos = JSON.parse(existingTodos) || [];
+
+      const updatedTodos = parsedTodos.filter(todo => todo.id !== id);
+
+      await AsyncStorage.setItem('todo', JSON.stringify(updatedTodos));
+      setTodos(updatedTodos);
+    } catch (error) {
+      console.error('Error deleting todo:', error);
+    }
   };
 
   return (

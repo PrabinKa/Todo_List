@@ -11,10 +11,13 @@ const TodoListsScreen = ({navigation}) => {
   const [buttonClickedType, setButtonClickedType] = useState('');
   const [todoItem, setTodoItem] = useState();
 
+
   const handleTodoOperation = () => {
     if (buttonClickedType == 'delete') {
       deleteTodo(todoItem.id);
       setIsAlertVisible(false);
+    }else{
+      navigation.navigate('Create Todo', {todoItem})
     }
   };
 

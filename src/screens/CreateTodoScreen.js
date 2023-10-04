@@ -5,22 +5,23 @@ import {COLORS} from '../constants/Colors';
 import {Button, ErrorModal} from '../components';
 import {useAppContext} from '../context/AppContext';
 
-const CreateTodoScreen = ({navigation}) => {
+const CreateTodoScreen = ({navigation, route}) => {
   const titleInputRef = useRef();
   const descriptionInputRef = useRef();
-  const {addTodo} = useAppContext();
+  const {addTodo, editTodo} = useAppContext();
   const [isErrorVisible, setIsErrorVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
   const date = new Date();
+  const {todoItem} = route.params;
 
-//   console.log(isErrorVisible)
+  // console.log('todoItem', todoItem);
 
   const [inputs, setInputs] = useState({
-    id: Math.random().toString(16).slice(2),
-    todoTitle: '',
-    todoNote: '',
-    completed: false,
-    createdAt: date.toISOString(),
+    id: todoItem?.id || Math.random().toString(16).slice(2),
+    todoTitle: todoItem?.todoTitle || '',
+    todoNote: todoItem?.todoNote || '',
+    completed: todoItem?.completed || false,
+    createdAt: todoItem?.createdAt || date.toISOString(),
   });
 
   const inputChangeHandler = (inputIdentifier, enteredValue) => {
@@ -43,7 +44,18 @@ const CreateTodoScreen = ({navigation}) => {
     }
   };
 
-    const hideErrorModal = () => {
+  const updateButtonHandler = () => {
+    const {todoTitle, todoNote} = inputs;
+    if (todoTitle == '' || todoNote == '') {
+      setIsErrorVisible(true);
+      setErrorMessage('Every field must be filled !');
+    } else {
+      editTodo(inputs);
+      navigation.goBack();
+    }
+  };
+
+  const hideErrorModal = () => {
     setIsErrorVisible(false);
   };
 
@@ -57,7 +69,7 @@ const CreateTodoScreen = ({navigation}) => {
         ref={titleInputRef}
         autoFocus={true}
         onChangeText={inputChangeHandler.bind(this, 'todoTitle')}
-        // value={noteInputs.title}
+        value={inputs.todoTitle}
       />
       <TextInput
         placeholder="Describe how will you perform this task.."
@@ -70,7 +82,7 @@ const CreateTodoScreen = ({navigation}) => {
         style={styles.noteInput}
         ref={descriptionInputRef}
         onChangeText={inputChangeHandler.bind(this, 'todoNote')}
-        // value={noteInputs.note}
+        value={inputs.todoNote}
       />
       <View style={styles.buttonContainer}>
         <Button
@@ -82,10 +94,10 @@ const CreateTodoScreen = ({navigation}) => {
         </Button>
         <Button
           onPress={() => {
-            saveButtonHandler();
+            todoItem ? updateButtonHandler() : saveButtonHandler();
           }}
           styleConfigs={styles.saveButton}>
-          Save
+          {todoItem ? 'Update' : 'Save'}
         </Button>
       </View>
       <ErrorModal
