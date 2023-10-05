@@ -11,6 +11,8 @@ const TodoListsScreen = ({navigation}) => {
   const [buttonClickedType, setButtonClickedType] = useState('');
   const [todoItem, setTodoItem] = useState();
 
+  const FinalTodo = todos.reverse();
+
   // Handle the todo operations(edit and delete) based on the button clicked
   const handleTodoOperation = () => {
     if (buttonClickedType == 'delete') {
@@ -42,7 +44,7 @@ const TodoListsScreen = ({navigation}) => {
         </View>
       ) : (
         <FlatList
-          data={todos}
+          data={FinalTodo}
           keyExtractor={item => item.id}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{padding: 20}}
